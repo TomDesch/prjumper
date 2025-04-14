@@ -14,12 +14,20 @@
     </extensions>
 
     <actions>
+        <!-- PR Mode Action -->
         <action id="com.github.tomdesch.prjumper.PRModeAction"
                 class="com.github.tomdesch.prjumper.actions.PRModeAction"
                 text="PR Mode"
                 description="Activate GitHub PR navigation mode">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
-    </actions>
 
+        <!-- Jump to next unviewed file -->
+        <action id="com.github.tomdesch.prjumper.JumpToNextFileAction"
+                class="com.github.tomdesch.prjumper.actions.JumpToNextFileAction"
+                text="Next Unviewed File"
+                description="Jump to next unviewed PR file">
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl 5"/>
+        </action>
+    </actions>
 </idea-plugin>
