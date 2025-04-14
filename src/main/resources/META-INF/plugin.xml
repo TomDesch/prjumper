@@ -23,7 +23,7 @@
         <postStartupActivity
                 implementation="com.github.tomdesch.prjumper.startup.GitHubTokenStartupActivity"/>
 
-
+        <notificationGroup id="PR Jumper Notifications" displayType="BALLOON"/>
     </extensions>
 
     <actions>

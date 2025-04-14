@@ -11,10 +11,12 @@ data class PullRequestRef(val owner: String, val repo: String, val number: Int)
 object PRContext {
     var current: PullRequestRef? = null
     var unviewedFiles: MutableList<String> = mutableListOf()
+    var totalFiles: Int = 0
 
     fun reset() {
         current = null
         unviewedFiles.clear()
+        totalFiles = 0
     }
 }
 
@@ -46,5 +48,6 @@ class PRModeAction : AnAction() {
 
         PRContext.unviewedFiles.clear()
         PRContext.unviewedFiles.addAll(files)
+        PRContext.totalFiles = files.size
     }
 }

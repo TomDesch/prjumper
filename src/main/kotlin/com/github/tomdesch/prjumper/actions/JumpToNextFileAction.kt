@@ -1,5 +1,7 @@
 package com.github.tomdesch.prjumper.actions
 
+import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.fileEditor.FileEditorManager
@@ -22,12 +24,19 @@ class JumpToNextFileAction : AnAction() {
             return
         }
 
-        val remaining = PRContext.unviewedFiles.size
         val next = PRContext.unviewedFiles.removeAt(0)
-        val total = remaining + 1 // current file + remaining
-        val current = total - remaining
+        val current = PRContext.totalFiles - PRContext.unviewedFiles.size
+        val total = PRContext.totalFiles
 
-        Messages.showInfoMessage(project, "Jumped to file $current of $total:\n$next", "PR Jumper")
+        NotificationGroupManager.getInstance()
+            .getNotificationGroup("PR Jumper Notifications")
+            .createNotification(
+                "PR Jumper",
+                "Jumped to file $current of $total:<br/><code>$next</code>",
+                NotificationType.INFORMATION
+            )
+            .notify(project)
+
         val file = findFileAnywhere(project, next)
         if (file != null) {
             FileEditorManager.getInstance(project).openFile(file, true)
