@@ -11,6 +11,10 @@
     <extensions defaultExtensionNs="com.intellij">
         <applicationService
                 serviceImplementation="com.github.tomdesch.prjumper.auth.GitHubTokenService"/>
+
+        <statusBarWidgetFactory
+                id="PRJumperStatusWidget"
+                implementation="com.github.tomdesch.prjumper.statusbar.PRStatusBarWidgetFactory"/>
     </extensions>
 
     <actions>
