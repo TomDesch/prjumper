@@ -73,26 +73,27 @@ object GitHubPRFetcher {
             .header("Authorization", "token $token")
             .build()
 
-        logger.info("? Fetching PR files: $url")
+        logger.info("Fetching PR files: $url")
         val response = client.newCall(request).execute()
 
-        logger.info("? GitHub Response Code: ${response.code}")
+        logger.info("GitHub Response Code: ${response.code}")
 
         if (!response.isSuccessful) {
-            logger.warn("? GitHub API error: ${response.body?.string()}")
+            logger.warn("GitHub API error: ${response.body?.string()}")
             return emptyList()
         }
 
 
-        val raw = response.body?.string()
-        logger.info("/user/repos response: $raw")
-
-
-        val jsonArray = JSONArray(raw)
-
+        val body = response.body?.string()
+        logger.info("/user/repos response: $body")
+        val jsonArray = JSONArray(body)
         return (0 until jsonArray.length()).mapNotNull { i ->
-            jsonArray.getJSONObject(i).optString("filename", null)
+            val obj = jsonArray.getJSONObject(i)
+            val status = obj.optString("status")
+            if (status == "removed") return@mapNotNull null
+            obj.optString("filename")
         }
+
     }
 
     fun debugCheckToken(): String {
