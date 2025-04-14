@@ -83,13 +83,32 @@ object GitHubPRFetcher {
             return emptyList()
         }
 
-        val body = response.body?.string() ?: return emptyList()
-        logger.debug("? Raw response body: $body")
 
-        val jsonArray = JSONArray(body)
+        val raw = response.body?.string()
+        logger.info("/user/repos response: $raw")
+
+
+        val jsonArray = JSONArray(raw)
 
         return (0 until jsonArray.length()).mapNotNull { i ->
             jsonArray.getJSONObject(i).optString("filename", null)
+        }
+    }
+
+    fun debugCheckToken(): String {
+        val token = GitHubTokenService.getInstance().getToken() ?: return "No token stored"
+
+        val request = Request.Builder()
+            .url("https://api.github.com/user")
+            .header("Authorization", "token $token")
+            .build()
+
+        return try {
+            val response = client.newCall(request).execute()
+            val body = response.body?.string()
+            if (response.isSuccessful) "Token OK: $body" else "Token failed: $body"
+        } catch (e: Exception) {
+            "Request error: ${e.message}"
         }
     }
 }

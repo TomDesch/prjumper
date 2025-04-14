@@ -14,16 +14,9 @@ import java.awt.EventQueue
 @Service(Service.Level.PROJECT)
 class GitHubTokenStartupActivity : ProjectActivity {
     override suspend fun execute(project: Project) {
-        val envToken = System.getenv("GITHUB_TOKEN")
         val storedToken = GitHubTokenService.getInstance().getToken()
 
-        val validToken = when {
-            !envToken.isNullOrBlank() && isTokenValid(envToken) -> envToken
-            !storedToken.isNullOrBlank() && isTokenValid(storedToken) -> storedToken
-            else -> null
-        }
-
-        if (validToken == null) {
+        if (storedToken.isNullOrBlank() || !isTokenValid(storedToken)) {
             withContext(Dispatchers.Main) {
                 EventQueue.invokeLater {
                     GitHubTokenDialog().show()

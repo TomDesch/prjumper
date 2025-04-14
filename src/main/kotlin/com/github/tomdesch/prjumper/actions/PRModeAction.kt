@@ -31,6 +31,8 @@ class PRModeAction : AnAction() {
         // Step 1: Select repo
         val repos = GitHubPRFetcher.fetchUserRepos()
         if (repos.isEmpty()) {
+            Messages.showInfoMessage(e.project, GitHubPRFetcher.debugCheckToken(), "Token Check")
+
             Messages.showErrorDialog(project, "No accessible GitHub repositories found.", "PR Mode")
             return
         }
