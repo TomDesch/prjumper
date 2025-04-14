@@ -15,13 +15,19 @@ class JumpToNextFileAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: return
 
+
         if (PRContext.unviewedFiles.isEmpty()) {
             Messages.showInfoMessage(project, "No more unviewed files.", "PR Mode Ended")
             PRContext.reset()
             return
         }
 
+        val remaining = PRContext.unviewedFiles.size
         val next = PRContext.unviewedFiles.removeAt(0)
+        val total = remaining + 1 // current file + remaining
+        val current = total - remaining
+
+        Messages.showInfoMessage(project, "Jumped to file $current of $total:\n$next", "PR Jumper")
         val file = findFileAnywhere(project, next)
         if (file != null) {
             FileEditorManager.getInstance(project).openFile(file, true)
