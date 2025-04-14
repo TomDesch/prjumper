@@ -14,6 +14,32 @@ object GitHubPRFetcher {
 
     data class PullRequestSummary(val number: Int, val title: String)
 
+    data class RepoSummary(val owner: String, val name: String)
+
+    fun fetchUserRepos(): List<RepoSummary> {
+        val token = GitHubTokenService.getInstance().getToken() ?: return emptyList()
+
+        val url = "https://api.github.com/user/repos?per_page=100"
+        val request = Request.Builder()
+            .url(url)
+            .header("Authorization", "token $token")
+            .build()
+
+        val response = client.newCall(request).execute()
+        if (!response.isSuccessful) return emptyList()
+
+        val body = response.body?.string() ?: return emptyList()
+        val jsonArray = JSONArray(body)
+
+        return (0 until jsonArray.length()).mapNotNull { i ->
+            val obj = jsonArray.getJSONObject(i)
+            val name = obj.optString("name")
+            val owner = obj.getJSONObject("owner").optString("login")
+            if (name.isNotBlank() && owner.isNotBlank()) RepoSummary(owner, name) else null
+        }
+    }
+
+
     fun fetchOpenPRs(owner: String, repo: String): List<PullRequestSummary> {
         val token = GitHubTokenService.getInstance().getToken() ?: return emptyList()
 
