@@ -3,9 +3,13 @@
     <name>Prjumper</name>
     <vendor email="tomdescheemaeker@hotmail.com" url="https://github.com/TomDesch">My Github</vendor>
     <description><![CDATA[
-        Jump between unviewed PR files using a GitHub token.<br>
-        Includes PR Mode navigation and token storage.
-    ]]></description>
+    Jump between unviewed PR files using a GitHub token.<br>
+    <b>New in v1.1:</b><br>
+    - Filterable repo + PR selector<br>
+    - Skips deleted files<br>
+    - Shows progress on file jump<br>
+]]></description>
+
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
