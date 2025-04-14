@@ -46,7 +46,7 @@ class JumpToNextFileAction : AnAction() {
 
         // If that was the last file
         if (PRContext.unviewedFiles.isEmpty()) {
-            Messages.showInfoMessage(project, "You’ve viewed all files in the PR.", "PR Mode Complete")
+            Messages.showInfoMessage(project, "You've viewed all files in the PR. ?", "PR Mode Complete")
             PRContext.reset()
         }
     }
