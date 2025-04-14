@@ -2,7 +2,7 @@
 
 PR Jumper is an IntelliJ plugin that helps you navigate unviewed files in a GitHub Pull Request, right from your IDE.
 
-### ? Features
+### Features
 
 - Fetches PR metadata via GitHub API
 - Lets you jump between files changed in a PR using `Ctrl + 5`
@@ -12,7 +12,7 @@ PR Jumper is an IntelliJ plugin that helps you navigate unviewed files in a GitH
 
 ---
 
-## ? Setup
+## Setup
 
 ### 1. Install the Plugin
 
@@ -27,7 +27,7 @@ You need a [GitHub personal access token](https://github.com/settings/tokens?typ
 
 You can set the token either:
 
-#### ? Automatically via `GITHUB_TOKEN` environment variable:
+#### Automatically via `GITHUB_TOKEN` environment variable:
 
 - On **macOS/Linux**:
   ```bash
@@ -42,11 +42,11 @@ You can set the token either:
 
 Restart IntelliJ after setting the variable.
 
-#### ? Or enter it manually when prompted on plugin launch.
+#### Or enter it manually when prompted on plugin launch.
 
 ---
 
-## ?? Usage
+## Usage
 
 - Click **PR Mode** under the `Tools` menu
 - Enter a PR ID (`42`) or full PR URL (`https://github.com/owner/repo/pull/42`)
@@ -55,7 +55,7 @@ Restart IntelliJ after setting the variable.
 
 ---
 
-## ? Development
+## Development
 
 This plugin uses:
 
@@ -66,6 +66,6 @@ This plugin uses:
 
 ---
 
-## ? License
+## License
 
-MIT — feel free to fork, extend, and PR back!
+MIT â€” feel free to fork, extend, and PR back!
