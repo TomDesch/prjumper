@@ -14,18 +14,23 @@ class JumpToNextFileAction : AnAction() {
         val project = e.project ?: return
 
         if (PRContext.unviewedFiles.isEmpty()) {
-            Messages.showInfoMessage(project, "No more unviewed files.", "PR Mode")
+            Messages.showInfoMessage(project, "No more unviewed files.", "PR Mode Ended")
+            PRContext.reset()
             return
         }
 
         val next = PRContext.unviewedFiles.removeAt(0)
-
-        // Search file in local file system
         val file = findFileInProject(project, next)
         if (file != null) {
             FileEditorManager.getInstance(project).openFile(file, true)
         } else {
             Messages.showErrorDialog(project, "File not found in project: $next", "PR Mode")
+        }
+
+        // If that was the last file
+        if (PRContext.unviewedFiles.isEmpty()) {
+            Messages.showInfoMessage(project, "You’ve viewed all files in the PR.", "PR Mode Complete")
+            PRContext.reset()
         }
     }
 
