@@ -15,6 +15,11 @@
         <statusBarWidgetFactory
                 id="PRJumperStatusWidget"
                 implementation="com.github.tomdesch.prjumper.statusbar.PRStatusBarWidgetFactory"/>
+
+        <postStartupActivity
+                implementation="com.github.tomdesch.prjumper.startup.GitHubTokenStartupActivity"/>
+
+
     </extensions>
 
     <actions>
