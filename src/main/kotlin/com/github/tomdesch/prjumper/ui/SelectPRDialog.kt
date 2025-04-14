@@ -14,23 +14,24 @@ import javax.swing.event.DocumentListener
 
 class SelectPRDialog : DialogWrapper(true) {
 
-    private val repoDropdown = ComboBox<String>(DefaultComboBoxModel()).apply { isEditable = true }
-    private val prDropdown = ComboBox<String>(DefaultComboBoxModel()).apply { isEditable = true }
+    private val repoDropdown = ComboBox<String>().apply { isEditable = true }
+    private val prDropdown = ComboBox<String>().apply { isEditable = true }
 
     private val repoMap = mutableMapOf<String, RepoSummary>()
     private val prMap = mutableMapOf<String, PullRequestSummary>()
-    private val allRepos = mutableListOf<String>()
-    private val allPRs = mutableListOf<String>()
+
+    private val allRepoKeys = mutableListOf<String>()
+    private val allPRKeys = mutableListOf<String>()
 
     var selectedPR: PullRequestRef? = null
         private set
 
     init {
         title = "Select PR"
-        loadRepos()
-        setupFiltering(repoDropdown, allRepos) { filterRepos(it) }
-        setupFiltering(prDropdown, allPRs) { filterPRs(it) }
         init()
+        loadRepos()
+        setupFiltering(repoDropdown, allRepoKeys)
+        setupFiltering(prDropdown, allPRKeys)
     }
 
     override fun createCenterPanel(): JComponent {
@@ -45,7 +46,10 @@ class SelectPRDialog : DialogWrapper(true) {
 
         repoDropdown.addItemListener {
             if (it.stateChange == ItemEvent.SELECTED) {
-                loadPRsFor(it.item.toString())
+                val selected = it.item?.toString() ?: return@addItemListener
+                if (repoMap.containsKey(selected)) {
+                    loadPRsFor(selected)
+                }
             }
         }
 
@@ -65,65 +69,62 @@ class SelectPRDialog : DialogWrapper(true) {
 
     private fun loadRepos() {
         val repos = GitHubPRFetcher.fetchUserRepos()
-        val model = repoDropdown.model as DefaultComboBoxModel<String>
-        model.removeAllElements()
-        allRepos.clear()
+        allRepoKeys.clear()
         repoMap.clear()
+        (repoDropdown.model as DefaultComboBoxModel).removeAllElements()
 
         repos.forEach {
             val key = "${it.owner}/${it.name}"
-            allRepos.add(key)
+            allRepoKeys.add(key)
             repoMap[key] = it
         }
 
-        allRepos.forEach { model.addElement(it) }
+        allRepoKeys.forEach { (repoDropdown.model as DefaultComboBoxModel).addElement(it) }
 
-        if (allRepos.isNotEmpty()) {
-            repoDropdown.selectedItem = allRepos.first()
-            loadPRsFor(allRepos.first())
+        if (allRepoKeys.isNotEmpty()) {
+            repoDropdown.selectedItem = allRepoKeys.first()
+            loadPRsFor(allRepoKeys.first())
         }
     }
 
     private fun loadPRsFor(repoKey: String) {
-        prDropdown.removeAllItems()
-        allPRs.clear()
-        prMap.clear()
-
         val (owner, name) = repoKey.split("/")
         val prs = GitHubPRFetcher.fetchOpenPRs(owner, name)
-        val model = prDropdown.model as DefaultComboBoxModel<String>
+
+        allPRKeys.clear()
+        prMap.clear()
+        (prDropdown.model as DefaultComboBoxModel).removeAllElements()
 
         prs.forEach {
             val label = "#${it.number} - ${it.title}"
-            allPRs.add(label)
+            allPRKeys.add(label)
             prMap[label] = it
         }
 
-        allPRs.forEach { model.addElement(it) }
-    }
-
-    private fun setupFiltering(dropdown: ComboBox<String>, sourceList: List<String>, onFilter: (String) -> Unit) {
-        val editor = dropdown.editor.editorComponent
-        if (editor is JTextField) {
-            editor.document.addDocumentListener(object : DocumentListener {
-                override fun insertUpdate(e: DocumentEvent?) = onFilter(editor.text)
-                override fun removeUpdate(e: DocumentEvent?) = onFilter(editor.text)
-                override fun changedUpdate(e: DocumentEvent?) = onFilter(editor.text)
-            })
+        allPRKeys.forEach { (prDropdown.model as DefaultComboBoxModel).addElement(it) }
+        if (allPRKeys.isNotEmpty()) {
+            prDropdown.selectedItem = allPRKeys.first()
         }
     }
 
-    private fun filterRepos(text: String) {
-        val model = repoDropdown.model as DefaultComboBoxModel<String>
-        model.removeAllElements()
-        allRepos.filter { it.contains(text, ignoreCase = true) }.forEach { model.addElement(it) }
-        repoDropdown.showPopup()
-    }
+    private fun setupFiltering(dropdown: ComboBox<String>, allItems: List<String>) {
+        val editor = dropdown.editor.editorComponent
+        if (editor is JTextField) {
+            editor.document.addDocumentListener(object : DocumentListener {
+                override fun insertUpdate(e: DocumentEvent?) = filter()
+                override fun removeUpdate(e: DocumentEvent?) = filter()
+                override fun changedUpdate(e: DocumentEvent?) = filter()
 
-    private fun filterPRs(text: String) {
-        val model = prDropdown.model as DefaultComboBoxModel<String>
-        model.removeAllElements()
-        allPRs.filter { it.contains(text, ignoreCase = true) }.forEach { model.addElement(it) }
-        prDropdown.showPopup()
+                private fun filter() {
+                    val input = editor.text
+                    val model = dropdown.model as DefaultComboBoxModel<String>
+                    model.removeAllElements()
+                    allItems.filter { it.contains(input, ignoreCase = true) }.forEach {
+                        model.addElement(it)
+                    }
+                    dropdown.showPopup()
+                }
+            })
+        }
     }
 }
