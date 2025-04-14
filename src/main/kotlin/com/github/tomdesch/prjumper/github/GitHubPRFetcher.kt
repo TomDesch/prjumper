@@ -12,6 +12,30 @@ object GitHubPRFetcher {
     private val client = OkHttpClient()
     private val logger = Logger.getInstance(GitHubPRFetcher::class.java)
 
+    data class PullRequestSummary(val number: Int, val title: String)
+
+    fun fetchOpenPRs(owner: String, repo: String): List<PullRequestSummary> {
+        val token = GitHubTokenService.getInstance().getToken() ?: return emptyList()
+
+        val url = "https://api.github.com/repos/$owner/$repo/pulls"
+        val request = Request.Builder()
+            .url(url)
+            .header("Authorization", "token $token")
+            .build()
+
+        val response = client.newCall(request).execute()
+        if (!response.isSuccessful) return emptyList()
+
+        val body = response.body?.string() ?: return emptyList()
+        val jsonArray = JSONArray(body)
+
+        return (0 until jsonArray.length()).mapNotNull { i ->
+            val obj = jsonArray.getJSONObject(i)
+            val number = obj.optInt("number")
+            val title = obj.optString("title", "")
+            if (number != 0) PullRequestSummary(number, title) else null
+        }
+    }
 
     fun fetchChangedFiles(): List<String> {
         val ref = PRContext.current ?: return emptyList()

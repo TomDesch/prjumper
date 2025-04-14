@@ -27,47 +27,46 @@ class PRModeAction : AnAction() {
     }
 
     override fun actionPerformed(e: AnActionEvent) {
-        val input = Messages.showInputDialog(
-            e.project, "Enter GitHub PR ID or URL:", "Activate PR Mode", Messages.getQuestionIcon()
+        val (owner, repo) = detectRepoFromGit() ?: run {
+            Messages.showErrorDialog(e.project, "Could not detect GitHub repo from .git/config", "PR Mode")
+            return
+        }
+
+        val prList = GitHubPRFetcher.fetchOpenPRs(owner, repo)
+        if (prList.isEmpty()) {
+            Messages.showErrorDialog(e.project, "No open PRs found or API call failed.", "PR Mode")
+            return
+        }
+
+        val displayOptions = prList.map { "#${it.number} - ${it.title}" }.toTypedArray()
+        val selected = Messages.showEditableChooseDialog(
+            "Select a pull request to jump through:",
+            "PR Mode",
+            Messages.getQuestionIcon(),
+            displayOptions,
+            displayOptions.firstOrNull(),
+            null
         ) ?: return
 
-        val ref = parsePRInput(input)
-        if (ref != null) {
-            PRContext.current = ref
-            Messages.showInfoMessage(
-                e.project, "PR Mode activated for ${ref.owner}/${ref.repo}#${ref.number}", "PR Mode"
-            )
+        val selectedNumber = selected.substringAfter("#").substringBefore(" ").toIntOrNull()
+        val selectedPR = prList.find { it.number == selectedNumber } ?: return
 
-            val files = GitHubPRFetcher.fetchChangedFiles()
-            if (files.isEmpty()) {
-                Messages.showErrorDialog(e.project, "No files found in PR or API call failed.", "PR Mode")
-                return
-            }
+        val ref = PullRequestRef(owner, repo, selectedPR.number)
 
-            PRContext.unviewedFiles.addAll(files)
+        PRContext.current = ref
+        Messages.showInfoMessage(
+            e.project, "PR Mode activated for ${ref.owner}/${ref.repo}#${ref.number}", "PR Mode"
+        )
 
-        } else {
-            Messages.showErrorDialog(e.project, "Invalid PR input", "PR Mode")
+        val files = GitHubPRFetcher.fetchChangedFiles()
+        if (files.isEmpty()) {
+            Messages.showErrorDialog(e.project, "No files found in PR or API call failed.", "PR Mode")
+            return
         }
+
+        PRContext.unviewedFiles.addAll(files)
+
     }
-
-    private fun parsePRInput(input: String): PullRequestRef? {
-        val urlPattern = Regex("""github\.com/([^/]+)/([^/]+)/pull/(\d+)""")
-        val match = urlPattern.find(input)
-        if (match != null) {
-            val (owner, repo, number) = match.destructured
-            return PullRequestRef(owner, repo, number.toInt())
-        }
-
-        val prNumber = input.toIntOrNull()
-        if (prNumber != null) {
-            val (owner, repo) = detectRepoFromGit() ?: return null
-            return PullRequestRef(owner, repo, prNumber)
-        }
-
-        return null
-    }
-
 
     private fun detectRepoFromGit(): Pair<String, String>? {
         val gitConfig = File(".git/config")
