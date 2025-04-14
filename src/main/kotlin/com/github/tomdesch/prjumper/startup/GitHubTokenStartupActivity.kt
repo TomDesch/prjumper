@@ -1,19 +1,25 @@
 package com.github.tomdesch.prjumper.startup
 
-import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.startup.StartupActivity
-import com.intellij.openapi.project.Project
 import com.github.tomdesch.prjumper.ui.GitHubTokenDialog
+import com.intellij.openapi.components.Service
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.startup.ProjectActivity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import java.awt.EventQueue
 
-class GitHubTokenStartupActivity : StartupActivity {
-    override fun runActivity(project: Project) {
+@Service(Service.Level.PROJECT)
+class GitHubTokenStartupActivity : ProjectActivity {
+    override suspend fun execute(project: Project) {
         val token = System.getenv("GITHUB_TOKEN")
 
         if (token.isNullOrBlank() || !isTokenValid(token)) {
-            ApplicationManager.getApplication().invokeLater {
-                GitHubTokenDialog().show()
+            withContext(Dispatchers.Main) {
+                EventQueue.invokeLater {
+                    GitHubTokenDialog().show()
+                }
             }
         }
     }
