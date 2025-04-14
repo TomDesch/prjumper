@@ -1,6 +1,9 @@
 package com.github.tomdesch.prjumper.ui
 
+import com.github.tomdesch.prjumper.auth.GitHubTokenService
 import com.intellij.openapi.ui.DialogWrapper
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import java.awt.Component.LEFT_ALIGNMENT
 import java.awt.Desktop
 import java.net.URI
@@ -44,7 +47,26 @@ class GitHubTokenDialog : DialogWrapper(true) {
             return
         }
 
-        // TODO: Save and validate token (hook into persistent storage later)
+        val request = Request.Builder()
+            .url("https://api.github.com/user")
+            .header("Authorization", "token $token")
+            .build()
+
+        val isValid = try {
+            OkHttpClient().newCall(request).execute().use { it.isSuccessful }
+        } catch (e: Exception) {
+            false
+        }
+
+        if (!isValid) {
+            JOptionPane.showMessageDialog(null, "Invalid GitHub token.")
+            return
+        }
+
+        // Save token to persistent service
+        GitHubTokenService.getInstance().setToken(token)
+
         super.doOKAction()
     }
+
 }
