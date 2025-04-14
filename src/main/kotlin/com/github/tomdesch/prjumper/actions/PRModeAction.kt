@@ -44,7 +44,6 @@ class PRModeAction : AnAction() {
                 return
             }
 
-            PRContext.unviewedFiles.clear()
             PRContext.unviewedFiles.addAll(files)
 
         } else {
