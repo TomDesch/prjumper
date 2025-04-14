@@ -14,12 +14,11 @@ repositories {
 intellij {
     version.set("2024.1.7")
     type.set("IC") // Target IDE Platform
-
-    plugins.set(listOf(/* Plugin Dependencies */))
 }
 
 dependencies {
-    implementation("com.squareup.okhttp3:okhttp:4.12.0") // latest as of now
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("org.json:json:20240303")
 }
 
 tasks {
