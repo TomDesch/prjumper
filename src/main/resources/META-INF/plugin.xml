@@ -10,7 +10,16 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationService
-                serviceImplementation="com.github.tomdesch.prjumper.auth.GitHubTokenService" />
+                serviceImplementation="com.github.tomdesch.prjumper.auth.GitHubTokenService"/>
     </extensions>
+
+    <actions>
+        <action id="com.github.tomdesch.prjumper.PRModeAction"
+                class="com.github.tomdesch.prjumper.actions.PRModeAction"
+                text="PR Mode"
+                description="Activate GitHub PR navigation mode">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+    </actions>
 
 </idea-plugin>
