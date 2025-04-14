@@ -15,8 +15,8 @@ import javax.swing.JPanel
 
 class SelectPRDialog : DialogWrapper(true) {
 
-    private val repoDropdown = ComboBox<String>()
-    private val prDropdown = ComboBox<String>()
+    private val repoDropdown = ComboBox<String>().apply { isEditable = true }
+    private val prDropdown = ComboBox<String>().apply { isEditable = true }
 
     private val repoMap = mutableMapOf<String, RepoSummary>()
     private val prMap = mutableMapOf<String, PullRequestSummary>()
