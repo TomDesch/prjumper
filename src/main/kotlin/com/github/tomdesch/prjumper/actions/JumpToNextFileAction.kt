@@ -4,11 +4,10 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vfs.LocalFileSystem
-import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.openapi.vfs.VirtualFileManager
 import java.io.File
 
 class JumpToNextFileAction : AnAction() {
@@ -38,25 +37,16 @@ class JumpToNextFileAction : AnAction() {
     }
 
     private fun findFileAnywhere(project: Project, path: String): VirtualFile? {
-        // Try local disk first
-        val basePath = project.basePath ?: return null
-        val localFile = File(basePath, path)
-        val found = LocalFileSystem.getInstance().findFileByIoFile(localFile)
-        if (found != null) return found
-
-        // Try GitHub plugin virtual files
-        val githubRoot = VirtualFileManager.getInstance().findFileByUrl("github://") ?: return null
-        var match: VirtualFile? = null
-
-        VfsUtilCore.iterateChildrenRecursively(githubRoot, null) { file ->
-            if (file.path.endsWith(path)) {
-                match = file
-                false // stop iteration
-            } else {
-                true // keep going
-            }
+        val sourceRoots = ProjectRootManager.getInstance(project).contentSourceRoots
+        for (root in sourceRoots) {
+            val candidate = root.findFileByRelativePath(path.substringAfter("src/main/java/"))
+            if (candidate != null) return candidate
         }
 
-        return match
+        // Fallback: try absolute path under project
+        val basePath = project.basePath ?: return null
+        val absoluteFile = File(basePath, path)
+        return LocalFileSystem.getInstance().findFileByIoFile(absoluteFile)
     }
+
 }
